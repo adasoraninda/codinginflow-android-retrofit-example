@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.adasoraninda.network.NetworkService
+import com.adasoraninda.response.Comment
 import com.adasoraninda.response.Post
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         textResult = findViewById(R.id.txt_result)
 
-        getPosts { data, error ->
+        getComments(3) { data, error ->
             textResult.text = data ?: error?.message
         }
     }
@@ -42,6 +43,31 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<List<Post>>, t: Throwable) {
+                    result(null, t)
+                }
+            })
+    }
+
+    private fun getComments(postId: Int, result: (data: String?, error: Throwable?) -> Unit) {
+        NetworkService.getJsonPlaceHolderService()
+            .getComments(postId)
+            .enqueue(object : Callback<List<Comment>> {
+                override fun onResponse(
+                    call: Call<List<Comment>>,
+                    response: Response<List<Comment>>
+                ) {
+
+                    if (response.isSuccessful.not()) {
+                        result(null, NullPointerException())
+                        return
+                    }
+
+                    response.body()?.let { posts ->
+                        result(Comment.formatOutput(*posts.toTypedArray()), null)
+                    }
+                }
+
+                override fun onFailure(call: Call<List<Comment>>, t: Throwable) {
                     result(null, t)
                 }
             })
