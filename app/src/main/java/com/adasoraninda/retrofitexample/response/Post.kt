@@ -1,4 +1,4 @@
-package com.adasoraninda.response
+package com.adasoraninda.retrofitexample.response
 
 import com.google.gson.annotations.SerializedName
 

@@ -3,9 +3,9 @@ package com.adasoraninda.retrofitexample
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.adasoraninda.network.NetworkService
-import com.adasoraninda.response.Comment
-import com.adasoraninda.response.Post
+import com.adasoraninda.retrofitexample.network.NetworkService
+import com.adasoraninda.retrofitexample.response.Comment
+import com.adasoraninda.retrofitexample.response.Post
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         textResult = findViewById(R.id.txt_result)
 
-        getComments(3) { data, error ->
+        createPost { data, error ->
             textResult.text = data ?: error?.message
         }
     }
@@ -68,6 +68,37 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<List<Comment>>, t: Throwable) {
+                    result(null, t)
+                }
+            })
+    }
+
+    private fun createPost(result: (data: String?, error: Throwable?) -> Unit) {
+        val post = Post(
+            userId = 47,
+            title = "New title",
+            text = "New text"
+        )
+
+        NetworkService.getJsonPlaceHolderService()
+            .createPost(post)
+            .enqueue(object : Callback<Post> {
+                override fun onResponse(
+                    call: Call<Post>,
+                    response: Response<Post>
+                ) {
+
+                    if (response.isSuccessful.not()) {
+                        result(null, NullPointerException())
+                        return
+                    }
+
+                    response.body()?.let { posts ->
+                        result(Post.formatOutput(posts), null)
+                    }
+                }
+
+                override fun onFailure(call: Call<Post>, t: Throwable) {
                     result(null, t)
                 }
             })
