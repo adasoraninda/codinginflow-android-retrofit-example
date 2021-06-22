@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         textResult = findViewById(R.id.txt_result)
 
-        deletePost { data, error ->
+        updatePutPost { data, error ->
             textResult.text = data ?: error?.message
         }
     }
